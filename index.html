@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI INFLUENCE — Dashboard Tickets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ===== VUE CONNEXION ===== -->
+  <section id="login-view" class="login-view">
+    <div class="login-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-mark">AI</div>
+        <div>
+          <h1>AI INFLUENCE</h1>
+          <p>Dashboard Tickets — 10 HTG</p>
+        </div>
+      </div>
+
+      <h2>Connexion</h2>
+      <p class="muted">Entrez votre email et votre mot de passe pour continuer.</p>
+
+      <form id="login-form" autocomplete="off">
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" placeholder="vous@exemple.com" required />
+
+        <label for="login-password">Mot de passe</label>
+        <input id="login-password" type="password" placeholder="••••••••" required />
+
+        <button type="submit" class="btn btn-primary" id="login-btn">
+          <span class="btn-label">Se connecter</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </form>
+
+      <p class="login-hint">Seuls les membres de l'équipe ayant un compte peuvent accéder.</p>
+    </div>
+  </section>
+
+  <!-- ===== VUE DASHBOARD ===== -->
+  <section id="dash-view" class="dash-view hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand brand-side">
+        <div class="brand-mark">AI</div>
+        <div>
+          <h1>AI INFLUENCE</h1>
+          <p>Dashboard Tickets</p>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="nav-item active" data-section="section-stock">
+          <svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+          Stock
+        </button>
+        <button class="nav-item" data-section="section-sell">
+          <svg viewBox="0 0 24 24"><path d="M20.59 13.41L11 3H4v7l9.59 10.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+          Vendre
+        </button>
+        <button class="nav-item" data-section="section-checkin">
+          <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+          Entrée
+        </button>
+        <button class="nav-item" data-section="section-history">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
+          Historique
+        </button>
+      </nav>
+
+      <div class="side-footer">
+        <div class="user-chip">
+          <div class="avatar" id="user-avatar">?</div>
+          <div class="user-meta">
+            <span id="user-email">—</span>
+            <small>Membre de l'équipe</small>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="page-title">Stock des billets</h2>
+          <p class="muted" id="today-label"></p>
+        </div>
+        <div class="price-badge">10 <span>HTG</span> / billet</div>
+      </header>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">En stock</span>
+          <span class="stat-value" id="stat-stock">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Vendus</span>
+          <span class="stat-value" id="stat-sold">0</span>
+        </div>
+        <div class="stat-card accent">
+          <span class="stat-label">Revenu total</span>
+          <span class="stat-value" id="stat-revenue">0 <small>HTG</small></span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Entrés</span>
+          <span class="stat-value" id="stat-used">0</span>
+        </div>
+      </div>
+
+      <!-- SECTION : STOCK -->
+      <div class="section" id="section-stock">
+        <div class="panel">
+          <h3>Ajouter un numéro de série</h3>
+          <p class="muted">Enregistrez les numéros de série des billets papier imprimés, un par un.</p>
+          <form id="stock-form" class="serial-form">
+            <input
+              id="stock-input"
+              type="text"
+              placeholder="Ex : AIF-0001"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+            <button type="submit" class="btn btn-primary" id="stock-btn">
+              <span class="btn-label">Ajouter au stock</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </form>
+          <p class="hint">Appuyez sur <kbd>Entrée</kbd> pour ajouter rapidement — le champ reste actif pour le billet suivant.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Derniers ajoutés</h3>
+            <button class="btn btn-ghost btn-sm" id="refresh-stock">Rafraîchir</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>N° de série</th>
+                  <th>Statut</th>
+                  <th>Ajouté par</th>
+                  <th>Heure</th>
+                </tr>
+              </thead>
+              <tbody id="stock-body">
+                <tr><td colspan="4" class="empty">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : VENDRE -->
+      <div class="section hidden" id="section-sell">
+        <div class="panel">
+          <h3>Vendre un billet</h3>
+          <p class="muted">Quand l'acheteur paie ses 10 gourdes, entrez le numéro de série du billet que vous lui remettez.</p>
+          <form id="sell-form" class="serial-form">
+            <input
+              id="sell-input"
+              type="text"
+              placeholder="Ex : AIF-0001"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+            <button type="submit" class="btn btn-primary" id="sell-btn">
+              <span class="btn-label">Vendre — 10 HTG</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </form>
+          <div id="sell-result" class="verify-result hidden"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Dernières ventes</h3>
+            <button class="btn btn-ghost btn-sm" id="refresh-sales">Rafraîchir</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>N° de série</th>
+                  <th>Vendeur</th>
+                  <th>Vendu le</th>
+                </tr>
+              </thead>
+              <tbody id="sales-body">
+                <tr><td colspan="3" class="empty">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : ENTRÉE (CHECK-IN) -->
+      <div class="section hidden" id="section-checkin">
+        <div class="panel">
+          <h3>Contrôle à l'entrée</h3>
+          <p class="muted">Entrez le numéro de série du billet présenté à la porte. Un billet valide ne peut entrer qu'une seule fois.</p>
+          <form id="checkin-form" class="serial-form">
+            <input
+              id="checkin-input"
+              type="text"
+              placeholder="Ex : AIF-0001"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+            <button type="submit" class="btn btn-primary" id="checkin-btn">
+              <span class="btn-label">Contrôler</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </form>
+          <div id="checkin-result" class="verify-result hidden"></div>
+        </div>
+      </div>
+
+      <!-- SECTION : HISTORIQUE -->
+      <div class="section hidden" id="section-history">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Tous les billets</h3>
+            <div class="history-tools">
+              <select id="history-filter">
+                <option value="">Tous les statuts</option>
+                <option value="stock">En stock</option>
+                <option value="sold">Vendus</option>
+                <option value="used">Entrés</option>
+              </select>
+              <input id="history-search" type="search" placeholder="Rechercher un n° ou un vendeur…" />
+              <button class="btn btn-ghost btn-sm" id="refresh-history">Rafraîchir</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>N° de série</th>
+                  <th>Statut</th>
+                  <th>Vendeur</th>
+                  <th>Vendu le</th>
+                  <th>Entré le</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="history-body">
+                <tr><td colspan="6" class="empty">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
