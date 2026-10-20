@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI INFLUENCE — Dashboard Tickets</title>
+  <title>AI INFLUENCE — Dashboard & Scanner Billets</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -36,7 +36,7 @@
 
       <form id="login-form" autocomplete="off">
         <label for="login-email">Email</label>
-        <input id="login-email" type="email" placeholder="vous@exemple.com" required />
+        <input id="login-email" type="email" placeholder="membre@ai-influence.ht" required />
 
         <label for="login-password">Mot de passe</label>
         <input id="login-password" type="password" placeholder="••••••••" required />
@@ -60,7 +60,7 @@
         <div class="brand-mark">AI</div>
         <div>
           <h1>AI INFLUENCE</h1>
-          <p>Dashboard Tickets</p>
+          <p>Dashboard & Scanner</p>
         </div>
       </div>
 
@@ -71,11 +71,15 @@
         </button>
         <button class="nav-item" data-section="section-sell">
           <svg viewBox="0 0 24 24"><path d="M20.59 13.41L11 3H4v7l9.59 10.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
-          Vendre
+          Vente
         </button>
         <button class="nav-item" data-section="section-checkin">
-          <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-          Entrée
+          <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+          Scanner Entrée
+        </button>
+        <button class="nav-item" data-section="section-lots">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Lots (1-10)
         </button>
         <button class="nav-item" data-section="section-history">
           <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
@@ -105,7 +109,9 @@
           <h2 id="page-title">Stock des billets</h2>
           <p class="muted" id="today-label"></p>
         </div>
-        <div class="price-badge">10 <span>HTG</span> / billet</div>
+        <div class="topbar-right">
+          <div class="price-badge">10 <span>HTG</span> / billet</div>
+        </div>
       </header>
 
       <!-- Stats -->
@@ -123,7 +129,7 @@
           <span class="stat-value" id="stat-revenue">0 <small>HTG</small></span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Entrés</span>
+          <span class="stat-label">Entrés (Porte)</span>
           <span class="stat-value" id="stat-used">0</span>
         </div>
       </div>
@@ -131,13 +137,19 @@
       <!-- SECTION : STOCK -->
       <div class="section" id="section-stock">
         <div class="panel">
-          <h3>Ajouter un numéro de série</h3>
-          <p class="muted">Enregistrez les numéros de série des billets papier imprimés, un par un.</p>
+          <div class="panel-head">
+            <div>
+              <h3>Ajouter des numéros au stock</h3>
+              <p class="muted">Enregistrez un billet individuel ou importez les lots prédéfinis (AJ9128001 à AJ9129000).</p>
+            </div>
+            <div class="badge-lot-info">1 000 billets prévus (LOT 1 à 10)</div>
+          </div>
+
           <form id="stock-form" class="serial-form">
             <input
               id="stock-input"
               type="text"
-              placeholder="Ex : AIF-0001"
+              placeholder="Ex : AJ9128001"
               autocomplete="off"
               spellcheck="false"
               required
@@ -147,12 +159,12 @@
               <span class="btn-spinner"></span>
             </button>
           </form>
-          <p class="hint">Appuyez sur <kbd>Entrée</kbd> pour ajouter rapidement — le champ reste actif pour le billet suivant.</p>
+          <p class="hint">Astuce : Les 10 lots complets (1 000 billets) peuvent être injectés directement via <a href="#" id="view-sql-info-btn">le script SQL sécurisé</a>.</p>
         </div>
 
         <div class="panel">
           <div class="panel-head">
-            <h3>Derniers ajoutés</h3>
+            <h3>Derniers billets ajoutés</h3>
             <button class="btn btn-ghost btn-sm" id="refresh-stock">Rafraîchir</button>
           </div>
           <div class="table-wrap">
@@ -160,13 +172,14 @@
               <thead>
                 <tr>
                   <th>N° de série</th>
+                  <th>Lot</th>
                   <th>Statut</th>
                   <th>Ajouté par</th>
                   <th>Heure</th>
                 </tr>
               </thead>
               <tbody id="stock-body">
-                <tr><td colspan="4" class="empty">Chargement…</td></tr>
+                <tr><td colspan="5" class="empty">Chargement…</td></tr>
               </tbody>
             </table>
           </div>
@@ -177,12 +190,12 @@
       <div class="section hidden" id="section-sell">
         <div class="panel">
           <h3>Vendre un billet</h3>
-          <p class="muted">Quand l'acheteur paie ses 10 gourdes, entrez le numéro de série du billet que vous lui remettez.</p>
+          <p class="muted">Quand l'acheteur paie ses 10 gourdes, saisissez le numéro de série du billet remis.</p>
           <form id="sell-form" class="serial-form">
             <input
               id="sell-input"
               type="text"
-              placeholder="Ex : AIF-0001"
+              placeholder="Ex : AJ9128001"
               autocomplete="off"
               spellcheck="false"
               required
@@ -205,38 +218,160 @@
               <thead>
                 <tr>
                   <th>N° de série</th>
+                  <th>Lot</th>
                   <th>Vendeur</th>
                   <th>Vendu le</th>
                 </tr>
               </thead>
               <tbody id="sales-body">
-                <tr><td colspan="3" class="empty">Chargement…</td></tr>
+                <tr><td colspan="4" class="empty">Chargement…</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- SECTION : ENTRÉE (CHECK-IN) -->
+      <!-- SECTION : SCANNER & CONTRÔLE ENTRÉE -->
       <div class="section hidden" id="section-checkin">
-        <div class="panel">
-          <h3>Contrôle à l'entrée</h3>
-          <p class="muted">Entrez le numéro de série du billet présenté à la porte. Un billet valide ne peut entrer qu'une seule fois.</p>
-          <form id="checkin-form" class="serial-form">
-            <input
-              id="checkin-input"
-              type="text"
-              placeholder="Ex : AIF-0001"
-              autocomplete="off"
-              spellcheck="false"
-              required
-            />
-            <button type="submit" class="btn btn-primary" id="checkin-btn">
-              <span class="btn-label">Contrôler</span>
-              <span class="btn-spinner"></span>
-            </button>
-          </form>
+        <div class="panel scanner-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Scanner de Billets & Contrôle Entrée</h3>
+              <p class="muted">Pointez la caméra vers le numéro de série imprimé ou le code-barres du billet.</p>
+            </div>
+            <div class="scanner-header-actions">
+              <button id="toggle-sound-btn" class="btn btn-ghost btn-sm" title="Son activé/désactivé">
+                <span id="sound-icon">🔊</span> <span id="sound-label">Son Actif</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SCANNER VIEWPORT CARD -->
+          <div class="scanner-card">
+            <div class="scanner-viewport-wrapper">
+              <video id="scanner-video" playsinline muted autoplay></video>
+              <canvas id="scanner-canvas" class="hidden"></canvas>
+              
+              <!-- HUD Overlay (Laser Reticle) -->
+              <div class="scanner-hud" id="scanner-hud">
+                <div class="hud-corner top-left"></div>
+                <div class="hud-corner top-right"></div>
+                <div class="hud-corner bottom-left"></div>
+                <div class="hud-corner bottom-right"></div>
+                
+                <div class="scan-laser" id="scan-laser"></div>
+                
+                <div class="hud-target-label">
+                  <span class="pulse-dot"></span>
+                  <span id="hud-status-text">CADREZ LE N° DE SÉRIE ICI (AJ9128...)</span>
+                </div>
+              </div>
+
+              <!-- Overlay quand caméra éteinte -->
+              <div class="camera-off-overlay" id="camera-off-overlay">
+                <div class="cam-icon">📷</div>
+                <h4>Caméra en pause</h4>
+                <p class="muted">Cliquez sur le bouton ci-dessous pour activer la caméra et démarrer le scan.</p>
+                <button id="start-cam-btn" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Activer la Caméra
+                </button>
+              </div>
+            </div>
+
+            <!-- Scanner Controls Bar -->
+            <div class="scanner-controls-bar">
+              <div class="controls-group">
+                <button id="cam-toggle-btn" class="btn btn-outline btn-sm">
+                  <span id="cam-toggle-text">Arrêter la caméra</span>
+                </button>
+                <button id="cam-switch-btn" class="btn btn-ghost btn-sm" title="Changer caméra (Avant/Arrière)">
+                  🔄 Changer Caméra
+                </button>
+                <button id="torch-toggle-btn" class="btn btn-ghost btn-sm hidden" title="Lampe / Flash">
+                  ⚡ Flash
+                </button>
+              </div>
+
+              <div class="controls-group">
+                <span class="scan-mode-badge" id="ocr-badge">MODE : OCR + CODE-BARRES</span>
+                <button id="force-scan-btn" class="btn btn-secondary btn-sm" title="Capturer & Analyser maintenant">
+                  📸 Analyser le billet
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Status & OCR Detection Feed -->
+            <div class="scanner-live-info">
+              <span id="scanner-live-detection">Statut : <strong id="det-text">Caméra prête...</strong></span>
+              <span id="scanner-fps" class="muted">Système Sécurisé v2.0</span>
+            </div>
+          </div>
+
+          <!-- VERDICT RESULT BANNER (GRAND ÉCRAN DE VALIDATION) -->
           <div id="checkin-result" class="verify-result hidden"></div>
+
+          <!-- SAISIE MANUELLE (SECOURS / BILLET FROISSÉ) -->
+          <div class="manual-checkin-fallback">
+            <details>
+              <summary>Ou entrez le numéro manuellement si le billet est froissé / déchiré</summary>
+              <form id="checkin-form" class="serial-form mt-3">
+                <input
+                  id="checkin-input"
+                  type="text"
+                  placeholder="Ex : AJ9128001"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                />
+                <button type="submit" class="btn btn-primary" id="checkin-btn">
+                  <span class="btn-label">Valider manuellement</span>
+                  <span class="btn-spinner"></span>
+                </button>
+              </form>
+            </details>
+          </div>
+        </div>
+
+        <!-- DERNIERS BILLETS CONTRÔLÉS À LA PORTE -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Derniers billets contrôlés à la porte</h3>
+            <button class="btn btn-ghost btn-sm" id="refresh-checkin-log">Rafraîchir</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>N° de série</th>
+                  <th>Lot</th>
+                  <th>Contrôleur</th>
+                  <th>Heure d'entrée</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="checkin-log-body">
+                <tr><td colspan="5" class="empty">Aucun contrôle récent.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : LOTS (LOT 1 À LOT 10) -->
+      <div class="section hidden" id="section-lots">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Répartition par Lot (LOT 1 à LOT 10)</h3>
+              <p class="muted">Chaque lot contient exactement 100 billets. Suivez l'avancement des ventes et des entrées par lot.</p>
+            </div>
+            <div class="price-badge">10 Lots • 1 000 Billets</div>
+          </div>
+
+          <div class="lots-grid" id="lots-container">
+            <!-- Dynamically populated 10 LOT cards -->
+          </div>
         </div>
       </div>
 
@@ -246,13 +381,26 @@
           <div class="panel-head">
             <h3>Tous les billets</h3>
             <div class="history-tools">
+              <select id="history-lot-filter">
+                <option value="">Tous les Lots</option>
+                <option value="1">LOT 1 (AJ9128001-AJ9128100)</option>
+                <option value="2">LOT 2 (AJ9128101-AJ9128200)</option>
+                <option value="3">LOT 3 (AJ9128201-AJ9128300)</option>
+                <option value="4">LOT 4 (AJ9128301-AJ9128400)</option>
+                <option value="5">LOT 5 (AJ9128401-AJ9128500)</option>
+                <option value="6">LOT 6 (AJ9128501-AJ9128600)</option>
+                <option value="7">LOT 7 (AJ9128601-AJ9128700)</option>
+                <option value="8">LOT 8 (AJ9128701-AJ9128800)</option>
+                <option value="9">LOT 9 (AJ9128801-AJ9128900)</option>
+                <option value="10">LOT 10 (AJ9128901-AJ9129000)</option>
+              </select>
               <select id="history-filter">
                 <option value="">Tous les statuts</option>
                 <option value="stock">En stock</option>
                 <option value="sold">Vendus</option>
                 <option value="used">Entrés</option>
               </select>
-              <input id="history-search" type="search" placeholder="Rechercher un n° ou un vendeur…" />
+              <input id="history-search" type="search" placeholder="Rechercher AJ9128... ou vendeur" />
               <button class="btn btn-ghost btn-sm" id="refresh-history">Rafraîchir</button>
             </div>
           </div>
@@ -261,6 +409,7 @@
               <thead>
                 <tr>
                   <th>N° de série</th>
+                  <th>Lot</th>
                   <th>Statut</th>
                   <th>Vendeur</th>
                   <th>Vendu le</th>
@@ -269,7 +418,7 @@
                 </tr>
               </thead>
               <tbody id="history-body">
-                <tr><td colspan="6" class="empty">Chargement…</td></tr>
+                <tr><td colspan="7" class="empty">Chargement…</td></tr>
               </tbody>
             </table>
           </div>
@@ -278,8 +427,14 @@
     </main>
   </section>
 
-  <!-- Supabase CDN -->
+  <!-- External Libraries -->
+  <!-- 1) Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- 2) Tesseract.js (Fast WebAssembly OCR) for Paper Serial Text Recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- 3) Html5-Qrcode for 1D Barcode & QR Code reading fallback -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>

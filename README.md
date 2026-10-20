@@ -1,62 +1,74 @@
-# AI INFLUENCE — Dashboard Tickets (10 HTG)
+# AI INFLUENCE — Dashboard & Scanner Biyè Haute Sécurité (10 HTG)
 
-Tableau de bord moderne pour gérer les billets papier de l'événement, de
-l'impression jusqu'à la porte d'entrée. Toutes les données sont sur **Supabase** —
-plusieurs membres de l'équipe peuvent agir en même temps, et le dashboard se met
-à jour **en temps réel**.
+Sistèm konplè pou jere ak valide **1 000 biyè papye** divize an **10 Lo (LOT 1 a LOT 10)** soti nan **AJ9128001** rive nan **AJ9129000**.
+Sistèm nan itilize **Supabase** pou baz done an tan reyèl ak **Kamera Entelijan (OCR + Kòd-Bar)** pou kontwòl otomatik nan pòt antre a.
 
-## Cycle de vie d'un billet
+---
 
+## 1. Distribisyon 1 000 Biyè yo pa Lo
+
+Chak lo gen egzakteman **100 biyè** (Prix : 10 HTG / biyè) :
+
+| Lo | Premye Nimewo | Dènye Nimewo | Kantite Biyè |
+| :--- | :--- | :--- | :--- |
+| **LOT 1** | `AJ9128001` | `AJ9128100` | 100 |
+| **LOT 2** | `AJ9128101` | `AJ9128200` | 100 |
+| **LOT 3** | `AJ9128201` | `AJ9128300` | 100 |
+| **LOT 4** | `AJ9128301` | `AJ9128400` | 100 |
+| **LOT 5** | `AJ9128401` | `AJ9128500` | 100 |
+| **LOT 6** | `AJ9128501` | `AJ9128600` | 100 |
+| **LOT 7** | `AJ9128601` | `AJ9128700` | 100 |
+| **LOT 8** | `AJ9128701` | `AJ9128800` | 100 |
+| **LOT 9** | `AJ9128801` | `AJ9128900` | 100 |
+| **LOT 10** | `AJ9128901` | `AJ9129000` | 100 |
+| **TOTAL** | **AJ9128001** | **AJ9129000** | **1 000 Biyè** |
+
+---
+
+## 2. Kijan pou Enjekte 1 000 Nimewo yo nan SQL (Supabase)
+
+Tout 1 000 nimewo yo pare nan fichye [insert_lots.sql](file:///c:/Users/HACKER/Documents/IA%20INFLUENCE/insert_lots.sql) ak [schema.sql](file:///c:/Users/HACKER/Documents/IA%20INFLUENCE/schema.sql) :
+
+1. Ale sou **[Supabase Dashboard](https://supabase.com)** nan pwojè w la.
+2. Klike sou meni **SQL Editor** (a goch) -> **New query**.
+3. Kopye tout sa ki nan [insert_lots.sql](file:///c:/Users/HACKER/Documents/IA%20INFLUENCE/insert_lots.sql) (oswa [schema.sql](file:///c:/Users/HACKER/Documents/IA%20INFLUENCE/schema.sql)).
+4. Klike sou **Run**.
+5. Nan 1 segonn sèlman, tout 1 000 biyè yo monte nan tab `public.aif_tickets` ak tout lo yo, estati `stock`, ak pri `10 HTG`.
+
+---
+
+## 3. Achitekti Sekirite Avanse (Anti-Fwod & Anti-Doublon)
+
+Pou evite moun itilize menm biyè a 2 fwa oswa photocopie :
+
+1. **Row-Level Locking (`FOR UPDATE`)** :
+   Fonksyon SQL `aif_validate_ticket_scan` bloke liy biyè a pandan tranzaksyon an. Menm si 2 moun ta eseye pase menm biyè a nan 2 pòt diferan nan egzakteman menm milisegonn nan, se sèl premye moun nan ki ap jwenn aksè !
+2. **Sik Lavi Biyè a** :
+   - `stock` : Biyè enprime men li poko peye.
+   - `sold` : Kliyan an fin peye 10 HTG, yo anrejistre vandè a ak dat la.
+   - `used` : Biyè a fin analize nan pòt la, li make kòm itilize epi li pa ka pase ankò.
+
+---
+
+## 4. Scanner Kamera Entelijan nan Pòt la
+
+Nou entegre yon sistèm vizyon pa òdinatè (Computer Vision) dirèkteman nan navigatè a :
+
+- **Lektè OCR (Tesseract.js WebAssembly)** : Li dirèkteman tèks nimewo seri a (`AJ9128...`) ki enprime sou biyè papye a san ou pa bezwen tape anyen ak men w !
+- **Lektè Kòd-Bar & QR Code (BarcodeDetector API)** : Si biyè a gen yon kòd-bar oswa QR, li li l nan mwens pase 50 milisegonn.
+- **Kadrans Lazè (HUD Targeting Reticle)** : Yon kadrans santre ak animasyon lazè kote ou sèlman bezwen vize nimewo seri a.
+- **Feedback Odyo & Haptik (Web Audio API)** :
+  - 🔔 **BEEP Pozitif (Akò Majè)** + Koulè Vèt : **ENTRÉE AUTORISÉE**.
+  - 🚨 **BUZZ Alam (160Hz)** + Vibrasyon + Koulè Wouj : **FAUX BILLET** oswa **DÉJÀ UTILISÉ**.
+  - ⚠️ **Son Avètisman** + Koulè Jon : **BILLET JAMAIS VENDU** (biyè a nan stock men li pa t janm peye).
+- **Zouti pou Ajan nan Pòt** : Bouton pou limen Flash/Torche nan fènwa, bouton pou chanje kamera (devan/dèyè), ak opsyon pou antre nimewo a alamen si biyè a ta chire.
+
+---
+
+## 5. Kijan pou Lanse Pwojè a
+
+Nan tèminal la nan dosye sa a :
+```powershell
+npx serve .
 ```
-[En stock] ──vente 10 HTG──> [Vendu] ──contrôle à la porte──> [Entré]
-```
-
-1. **Stock** — enregistrez les numéros de série des billets imprimés, un par un.
-2. **Vendre** — quand l'acheteur paie ses 10 gourdes, entrez le numéro du billet
-   remis → il passe « Vendu » avec le nom du vendeur. Permet de compter l'argent :
-   *X billets vendus × 10 HTG = montant que le vendeur doit remettre.*
-3. **Entrée** — à la porte, entrez le numéro présenté :
-   - Numéro inconnu → **FAUX BILLET** (rouge)
-   - « En stock » → **BILLET JAMAIS VENDU** (orange — papier authentique mais non payé)
-   - « Vendu » → **ENTRÉE AUTORISÉE** (vert) → passe « Entré »
-   - « Entré » → **DÉJÀ ENTRÉ** (rouge — possible photocopie, un numéro ne marche qu'une fois)
-
-## Fichiers
-
-| Fichier      | Rôle                                                   |
-| ------------ | ------------------------------------------------------ |
-| `index.html` | Page de connexion + dashboard (4 sections)             |
-| `styles.css` | Design (light mode, thème IA)                          |
-| `app.js`     | Logique : auth, stock, ventes, check-in, stats         |
-| `config.js`  | Vos clés Supabase (à modifier)                         |
-| `schema.sql` | SQL pour créer la table `aif_tickets` dans Supabase    |
-
-## Installation (5 étapes)
-
-1. **Ouvrez votre projet Supabase** sur https://supabase.com
-   (le préfixe `aif_` évite tout conflit avec vos tables actuelles).
-
-2. **Exécutez le SQL** — Supabase Dashboard → **SQL Editor** → New query →
-   copiez tout le contenu de `schema.sql` → **Run**.
-
-3. **Créez les comptes de l'équipe** — Supabase Dashboard →
-   **Authentication → Users → Add user** → email + mot de passe pour chaque membre.
-
-4. **Renseignez `config.js`** — Supabase Dashboard →
-   **Project Settings → API** → copiez `Project URL` et `anon public key`,
-   remplacez `VOTRE-PROJET` et `VOTRE-ANON-KEY` dans `config.js`.
-
-5. **Ouvrez `index.html`** — double-cliquez dessus, ou servez le dossier :
-   ```
-   npx serve .
-   ```
-
-## Sécurité & anti-fraude
-
-- `serial_number` est **unique** : impossible d'enregistrer deux fois le même numéro.
-- Les transitions `stock → sold → used` sont **atomiques** (`.eq("status", ...)`)
-  : deux vendeurs ne peuvent pas vendre le même billet en même temps, et deux
-  contrôleurs ne peuvent pas faire entrer le même billet simultanément.
-- **RLS** : seuls les membres connectés lisent/écrivent ; un membre ne peut
-  supprimer que les numéros **en stock** qu'il a lui-même ajoutés.
-- Ne mettez jamais la `service_role` key dans le code — elle donne tous les droits.
+Oswa ouvri dirèkteman fichye [index.html](file:///c:/Users/HACKER/Documents/IA%20INFLUENCE/index.html) nan navigatè Google Chrome / Edge / Safari ou.
